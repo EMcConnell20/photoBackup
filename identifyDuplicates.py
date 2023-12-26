@@ -1,3 +1,6 @@
+## TO DO
+# I'd like to create a CSV that identifies the files that are duplicates
+
 # Specify the root folder
 #root_folder = '/Volumes/Video/takeOutoutput'
 import hashlib
@@ -33,7 +36,7 @@ def write_to_csv(duplicate_files, output_csv):
 def hash_duplicates(duplicate_files):
 
     hashed_files = {}
-            
+
     for key, value_list in duplicate_files.items():
     
     # Iterate through each item in the list
@@ -53,24 +56,31 @@ def hash_file(file_path):
         return hashlib.md5(f.read()).hexdigest()
     
 def check_duplicate_hash(hashed_files):
-    for filename, records in hashed_files.items():
-        print(f"File: {filename}")
 
-        # Iterate through the list of records for each file
-        for i in range(len(records) - 1):
-            hash1 = records[i]['hash']
-            hash2 = records[i + 1]['hash']
-            
-            # Compare hash values
-            if hash1 == hash2:
-                print(f"  Hash values match for locations {records[i]['location']} and {records[i + 1]['location']}")
-            else:
-                print(f"  Hash values do not match for locations {records[i]['location']} and {records[i + 1]['location']}")
+    with open(hash_csv, 'w', newline='') as csvfile:
+
+        writer = csv.writer(csvfile)
+        writer.writerow(['File Name', 'Location1', 'Hash1', 'Location2', 'Hash2'])
+
+        for filename, records in hashed_files.items():
+            print(f"File: {filename}")
+
+            # Iterate through the list of records for each file
+            for i in range(len(records) - 1):
+                hash1 = records[i]['hash']
+                hash2 = records[i + 1]['hash']
+                
+                # Compare hash values
+                if hash1 == hash2:
+                    print(f"  Hash values match for locations {records[i]['location']} and {records[i + 1]['location']}")
+                else:
+                    print(f"  Hash values do not match for locations {records[i]['location']} and {records[i + 1]['location']}")
 
 
 # Specify the root folder
 root_folder = 'test'
 output_csv = 'output/duplicate_files.csv'
+hash_csv = 'output/hashed_files.csv'
 
 # Get a list of all files in subfolders
 all_files_list = get_all_files(root_folder)
