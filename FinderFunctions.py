@@ -122,10 +122,6 @@ def scanFolder(root_path: "str") -> "dict":
         else:  # If the folder was unaccessible or didn't contain any files.
             folder_path_list.remove(folder_path)
 
-    del hash_list
-    del folder_path
-    del item
-
     # Stores all duplicate hashes.
     duplicate_hash_list = []
 
@@ -164,12 +160,14 @@ def scanFolder(root_path: "str") -> "dict":
                     if iterator != 0:
                         total_folder_index_list[iterator] -= 1
 
-                        if (
-                            total_folder_index_list[iterator]
+                        while (
+                            iterator < len(total_folder_index_list)
+                            and total_folder_index_list[iterator]
                             == total_folder_index_list[iterator - 1]
                         ):
                             total_folder_index_list.pop(iterator - 1)
                             folder_path_list.pop(iterator - 1)
+                            total_folder_index_list[iterator - 1] -= 1
 
                     iterator += 1
 
@@ -184,9 +182,13 @@ def scanFolder(root_path: "str") -> "dict":
                 if iterator != 0:
                     total_folder_index_list[iterator] -= 1
 
-                    if iterator == 1 and total_folder_index_list[iterator] == 0:
+                    while iterator < len(total_folder_index_list) and (
+                        total_folder_index_list[iterator]
+                        == total_folder_index_list[iterator - 1]
+                    ):
                         total_folder_index_list.pop(iterator - 1)
                         folder_path_list.pop(iterator - 1)
+                        total_folder_index_list[iterator - 1] -= 1
 
                 iterator += 1
 
