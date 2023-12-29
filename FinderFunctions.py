@@ -17,8 +17,16 @@ def confirmFolderAccessibility(folder_path: "str") -> "bool":
         return True
 
 
+def checkExtensionType(file_name: "str") -> "str":
+    extension_name = file_name[-3] + file_name[-2] + file_name[-1]
+
+    return extension_name
+
+
 def hashFolderContents(
-    folder_path: "str", excluded_file_names: "set" = (".DS_Store", ".localized")
+    folder_path: "str",
+    excluded_file_names: "set" = (".DS_Store", ".localized"),
+    excluded_file_types: "set" = ("zip"),
 ) -> "list":
     """
     Hashes every file name in a folder and adds it to a list.
@@ -27,6 +35,7 @@ def hashFolderContents(
 
     folder_path (str): The directory path of the folder to get names from.
     excluded_file_names (set, optional): Files with names in this set will be ignored. Defaults to (".DS_Store", ".localized").
+    excluded_file_types (set, optional): Files with extensions in this set will be ignored. Defaults to ("zip).
     """
 
     # Checks if 'folder_path' is accessible. Returns an empty list if it is not.
@@ -36,7 +45,11 @@ def hashFolderContents(
     # Stores the names of every non-folder file thats name isn't in 'excluded_file_names'.
     file_name_list = []
     for file_name in os.listdir(folder_path):
-        if os.path.isdir(file_name) == False and file_name not in excluded_file_names:
+        if (
+            os.path.isdir(file_name) == False
+            and file_name not in excluded_file_names
+            and checkExtensionType(file_name) not in excluded_file_types
+        ):
             file_name_list.append(file_name)
 
     # Converts names to hashes and stores them.
@@ -109,6 +122,10 @@ def scanFolder(root_path: "str") -> "dict":
         else:  # If the folder was unaccessible or didn't contain any files.
             folder_path_list.remove(folder_path)
 
+    del hash_list
+    del folder_path
+    del item
+
     # Stores all duplicate hashes.
     duplicate_hash_list = []
 
@@ -116,14 +133,14 @@ def scanFolder(root_path: "str") -> "dict":
     duplicate_hash_paths_list = []
 
     # Stores the length of 'total_hash_list' so that the loop doesn't have to check it every single time.
-    hash_list_length = len(hash_list)
+    hash_list_length = len(total_hash_list)
 
     # Finds duplicate hashes and creates nested lists of directory paths that the hash came from.
     while hash_list_length > 0:
         current_item = total_hash_list[0]
         item_count = total_hash_list.count(current_item)
 
-        if item_count > 0:
+        if item_count > 1:
             folder_index = 0
             path_list = []
 
@@ -142,7 +159,8 @@ def scanFolder(root_path: "str") -> "dict":
                 item_count -= 1
                 hash_list_length -= 1
 
-                for iterator in range(folder_index + 1, len(total_folder_index_list)):
+                iterator = folder_index + 1
+                while iterator < len(total_folder_index_list):
                     if iterator != 0:
                         total_folder_index_list[iterator] -= 1
 
@@ -153,19 +171,24 @@ def scanFolder(root_path: "str") -> "dict":
                             total_folder_index_list.pop(iterator - 1)
                             folder_path_list.pop(iterator - 1)
 
+                    iterator += 1
+
             duplicate_hash_list.append(current_item)
             duplicate_hash_paths_list.append(path_list)
         else:
             total_hash_list.remove(current_item)
             hash_list_length -= 1
 
-            for iterator in len(total_folder_index_list):
+            iterator = 0
+            while iterator < len(total_folder_index_list):
                 if iterator != 0:
                     total_folder_index_list[iterator] -= 1
 
                     if iterator == 1 and total_folder_index_list[iterator] == 0:
                         total_folder_index_list.pop(iterator - 1)
                         folder_path_list.pop(iterator - 1)
+
+                iterator += 1
 
     # Stores the directory path of every file with duplicate names.
     duplicate_directory_path_list = []
