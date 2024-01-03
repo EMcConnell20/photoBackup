@@ -45,7 +45,7 @@ def hash_folder_contents(folder_path: str) -> list:
 
     # Creates a list of every file that's type isn't excluded.
     file_name_list = [
-        file_name
+        os.path.basename(file_name)
         for file_name in os.listdir(folder_path)
         if os.path.isdir(os.path.join(folder_path, file_name)) == False
         and get_file_extension(file_name) not in EXCLUDED_FILE_TYPES
@@ -66,7 +66,7 @@ def create_file_dictionary(hash_list: int, hash_folder_path_list: list) -> dict:
         hash_file_name = None
 
         file_name_list = [
-            file_name
+            os.path.basename(file_name)
             for file_name in os.listdir(hash_folder_path_list[iterator][0])
             if os.path.isdir(
                 os.path.join(hash_folder_path_list[iterator][0], file_name)
