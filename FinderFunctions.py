@@ -1,6 +1,3 @@
-# This module contains functions responsible for finding files with matching names.
-
-
 import os
 
 
