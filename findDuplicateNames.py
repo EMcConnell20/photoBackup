@@ -1,4 +1,5 @@
 import os
+import hashlib
 
 
 EXCLUDED_FILE_TYPES = ("DS_Store", "localized", "zip")
@@ -45,7 +46,7 @@ def hash_folder_contents(folder_path: str) -> list:
 
     # Creates a list of every file that's type isn't excluded.
     file_name_list = [
-        os.path.basename(file_name)
+        file_name
         for file_name in os.listdir(folder_path)
         if os.path.isdir(os.path.join(folder_path, file_name)) == False
         and get_file_extension(file_name) not in EXCLUDED_FILE_TYPES
@@ -66,7 +67,7 @@ def create_file_dictionary(hash_list: int, hash_folder_path_list: list) -> dict:
         hash_file_name = None
 
         file_name_list = [
-            os.path.basename(file_name)
+            file_name
             for file_name in os.listdir(hash_folder_path_list[iterator][0])
             if os.path.isdir(
                 os.path.join(hash_folder_path_list[iterator][0], file_name)
@@ -148,6 +149,37 @@ def scan_folder(root_path: str) -> dict:
     return create_file_dictionary(duplicate_hash_list, duplicate_hash_path_list)
 
 
+def hash_file(file_path):
+    """
+    Hashes a file.
+    """
+    file_hash = hashlib.sha256()
+
+    # Lambda GPT evil
+    with open(file_path, "rb") as file:
+        for byte_block in iter(lambda: file.read(4096), b""):
+            file_hash.update(byte_block)
+
+    return file_hash.hexdigest()
+
+
+def confirm_duplicates(duplicate_dict: dict):
+    duplicate_list = []
+
+    for key in duplicate_dict.keys():
+        hash_list = []
+
+        for file_path in duplicate_dict[key]:
+            hash_list.append(hash_file(file_path))
+
+        while len(hash_list) > 0:
+            if hash_list.count(hash_list[0]) > 1:
+                duplicate_list.append(duplicate_dict[key].pop(0))
+            hash_list.pop(0)
+
+    return duplicate_list
+
+
 if __name__ == "__main__":
     os.system("clear")
 
@@ -163,3 +195,6 @@ if __name__ == "__main__":
         for file_path in file_dict[key]:
             print(f"{file_path}")
         print("")
+
+    final_output = confirm_duplicates(file_dict)
+    print(final_output)
