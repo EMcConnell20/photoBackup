@@ -175,6 +175,8 @@ def confirm_duplicates(duplicate_dict: dict):
         while len(hash_list) > 0:
             if hash_list.count(hash_list[0]) > 1:
                 duplicate_list.append(duplicate_dict[key].pop(0))
+            else:
+                duplicate_dict[key].pop(0)
             hash_list.pop(0)
 
     return duplicate_list
